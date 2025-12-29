@@ -27,9 +27,13 @@ sam deploy \
     --resolve-s3 \
     --capabilities CAPABILITY_IAM \
     --no-confirm-changeset \
+    --tags \
+        Service="UserManagementAPI" \
+        RepositoryName="antonioreuter/poc-ai-ops/poc-validator-user-api" \
+        HashCommit="$(git rev-parse HEAD 2>/dev/null || echo "no-git")" \
     --parameter-overrides \
-        RepositoryName="poc-validator-user-api" \
-        CommitHash=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
+        RepositoryName="antonioreuter/poc-ai-ops/poc-validator-user-api" \
+        CommitHash="$(git rev-parse HEAD 2>/dev/null || echo "no-git")"
 
 if [ $? -eq 0 ]; then
     echo "Deployment successful!"

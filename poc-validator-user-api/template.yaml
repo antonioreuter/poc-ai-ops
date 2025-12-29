@@ -46,6 +46,13 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
 
   # --- 2. API Gateway ---
   UserApi:
@@ -62,6 +69,10 @@ Resources:
               Headers:
                 - x-api-key
             AuthorizerResultTtlInSeconds: 0
+      Tags:
+        Service: UserManagementAPI
+        RepositoryName: !Ref RepositoryName
+        HashCommit: !Ref CommitHash
 
   # --- 3. Lambda Functions ---
 
@@ -185,6 +196,72 @@ Resources:
         <<: *EsbuildProperties
         EntryPoints:
           - src/handlers/delete-user.ts
+
+  # --- 4. CloudWatch Log Groups (Explicit for Tagging) ---
+  AuthorizerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AuthorizerFunction}
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
+
+  CreateUserLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CreateUserFunction}
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
+
+  GetUserLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GetUserFunction}
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
+
+  ListUsersLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ListUsersFunction}
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
+
+  DeleteUserLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DeleteUserFunction}
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: UserManagementAPI
+        - Key: RepositoryName
+          Value: !Ref RepositoryName
+        - Key: HashCommit
+          Value: !Ref CommitHash
 
 Outputs:
   ApiUrl:

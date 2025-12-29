@@ -82,15 +82,17 @@ The system utilizes the following resource tags in `template.yaml` to establish 
 ### Deployment and Verification
 
 ```bash
-# 1. Deploy the Target API
+# 1. Navigate to the Target API Directory
 cd poc-validator-user-api
-./deploy.sh
 
 # 2. Execute Unit Tests
 npm run test:unit
 
-# 3. Execute Performance Benchmarks
-npm run test:perf
+# 3. Deploy the Target API
+./deploy.sh
+
+# 4. Execute End-to-End Tests
+npm run test:e2e
 ```
 
 ---
