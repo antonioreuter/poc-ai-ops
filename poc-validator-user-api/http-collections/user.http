@@ -1,0 +1,25 @@
+### List Users
+GET {{baseUrl}}/users
+x-api-key: {{apiKey}}
+
+### Create User
+# @name createUser
+POST {{baseUrl}}/users
+x-api-key: {{apiKey}}
+Content-Type: application/json
+
+{
+    "name": "Antonio Reuter",
+    "email": "antonioreuter@gmail.com"
+}
+
+### Capture Created ID
+@createdId = {{createUser.response.body.UserId}}
+
+### Get User
+GET {{baseUrl}}/users/{{createdId}}
+x-api-key: {{apiKey}}
+
+### Delete User
+DELETE {{baseUrl}}/users/{{createdId}}
+x-api-key: {{apiKey}}

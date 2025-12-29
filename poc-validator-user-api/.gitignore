@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build and SAM artifacts
+dist/
+.aws-sam/
+.esbuild/
+
+# Environment and Secrets
+.env
+http-client.env.json
+
+# Test Reports
+tests/performance/reports/*.html
+summary.html
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,27 @@
+{
+  "name": "poc-validator-user-api",
+  "version": "1.0.0",
+  "description": "Serverless User API for AI Agent Validation",
+  "main": "app.js",
+  "scripts": {
+    "test": "dotenv -e .env -- vitest run tests",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "dotenv -e .env -- vitest run tests/e2e",
+    "test:perf": "dotenv -e .env -- k6 run tests/performance/load-test.js",
+    "build": "esbuild src/**/*.ts --bundle --platform=node --target=node22 --outdir=dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/lib-dynamodb": "^3.400.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "dotenv-cli": "^11.0.0",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16"
+  }
+}
