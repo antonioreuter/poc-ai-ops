@@ -10,8 +10,11 @@ echo "[LOG] Using Profile: $PROFILE"
 # Navigate to the infrastructure directory
 cd infrastructure
 
+# Fetch latest git commit hash
+export GIT_COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+
 # Deploy the CDK stack
-echo "[LOG] Deploying infrastructure via CDK..."
+echo "[LOG] Deploying infrastructure via CDK (Commit: $GIT_COMMIT_HASH)..."
 npx cdk deploy --require-approval never --region $REGION --profile $PROFILE
 
 if [ $? -eq 0 ]; then

@@ -11,6 +11,10 @@ echo "Starting CI/CD Pipeline..."
 echo "[LOG] Using Region: $REGION"
 echo "[LOG] Using Profile: $PROFILE"
 
+# Fetch latest git commit hash for tagging
+export GIT_COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+echo "[LOG] Git Commit: $GIT_COMMIT_HASH"
+
 # 1. Run Root Unit Tests
 echo "[LOG] Running application unit tests..."
 npm run test:unit

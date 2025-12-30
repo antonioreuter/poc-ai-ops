@@ -139,6 +139,18 @@ export class InfrastructureStack extends cdk.Stack {
     cdk.Tags.of(this).add('Service', 'UserManagementAPI');
     cdk.Tags.of(this).add('RepositoryName', 'antonioreuter/poc-ai-ops/poc-validator-user-api');
     
+    // Add Git Commit Tag
+    const gitCommit = process.env.GIT_COMMIT_HASH || 
+                      process.env.GITHUB_SHA || 
+                      (() => {
+                        try {
+                          return require('child_process').execSync('git rev-parse HEAD').toString().trim();
+                        } catch (e) {
+                          return 'unknown';
+                        }
+                      })();
+    cdk.Tags.of(this).add('GitCommit', gitCommit);
+    
     // Outputs
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.url,
