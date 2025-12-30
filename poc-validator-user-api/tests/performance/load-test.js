@@ -12,7 +12,7 @@ const deleteTrend = new Trend('rt_delete_user');
 
 export const options = {
   vus: 5,
-  iterations: 100,
+  iterations: 300,
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   thresholds: {
     'rt_create_user': ['p(95)<1200'], 

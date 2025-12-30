@@ -32,7 +32,7 @@ sequenceDiagram
 ## Repository Structure
 
 - **/poc-ops-agent**: The autonomous remediation orchestration engine. Developed using the Strands SDK, it manages the comprehensive incident lifecycle.
-- **/poc-validator-user-api**: A production-representative target system (User Management API) utilized to validate the capabilities of the Sentry Agent.
+- **/poc-validator-user-api**: A production-representative target system (User Management API) utilized to validate the capabilities of the Sentry Agent. Now features structured logging and advanced monitoring.
 
 ---
 
@@ -41,7 +41,7 @@ sequenceDiagram
 **Purpose:** Manages clinical remediation and incident orchestration.
 
 - **Incident Lifecycle Management:** Automated acknowledgment and suppression of PagerDuty incidents during the investigation phase.
-- **Version Traceability:** Utilizes the **Model Context Protocol (MCP)** to retrieve the `HashCommit` metadata from AWS resources to ensure environment parity.
+- **Version Traceability:** Utilizes the **Model Context Protocol (MCP)** to retrieve the `GitCommit` metadata from AWS resources to ensure environment parity.
 - **Multi-Model Analysis:**
   - **Ollama:** Conducts local data processing and PII redaction.
   - **Gemini 1.5 Pro:** Analyzes extensive log data and complex application logic via a large context window.
@@ -54,17 +54,20 @@ sequenceDiagram
 
 **Purpose:** Target system for AI verification and validation testing.
 
-- **Technical Stack:** Node.js 22, TypeScript, AWS CDK, and Amazon DynamoDB.
+- **Technical Stack:** Node.js 22, TypeScript, AWS CDK, Amazon DynamoDB, and **Pino** for structured logging.
 - **Agent-Ready Metadata:** Adheres to strict tagging standards required for automated traceability.
-- **Diagnostic Simulation:** Incorporates a Custom Lambda Authorizer to simulate authentication failures, facilitating diagnostic verification.
+- **Observability:**
+  - **Structured Logging:** Integrated with Pino to provide machine-readable JSON logs for AI analysis.
+  - **Application Signals & SLOs:** Automated service discovery and Service Level Objectives (Availability 99.9%, Latency < 1s) for error budget tracking.
+- **Diagnostic Simulation:** Incorporates a Custom Lambda Authorizer and CloudWatch Alarms to facilitate incident detection and diagnostic verification.
 
 The system utilizes resource tags in the CDK stack to establish the required traceability:
 
-| Tag              | Value                    | Purpose                                                                     |
-| :--------------- | :----------------------- | :-------------------------------------------------------------------------- |
-| `Service`        | `UserManagementAPI`      | Identifies the business domain and service context.                         |
-| `RepositoryName` | `poc-validator-user-api` | Directs the Agent to the relevant source code repository.                   |
-| `HashCommit`     | `$(git rev-parse HEAD)`  | **Mandatory:** Specifies the exact commit hash deployed in the environment. |
+| Tag              | Value                     | Purpose                                                                     |
+| :--------------- | :------------------------ | :-------------------------------------------------------------------------- |
+| `Service`        | `User-Management-API-CDK` | Identifies the business domain and service context.                         |
+| `RepositoryName` | `poc-validator-user-api`  | Directs the Agent to the relevant source code repository.                   |
+| `GitCommit`      | `$(git rev-parse HEAD)`   | **Mandatory:** Specifies the exact commit hash deployed in the environment. |
 
 ---
 
@@ -83,21 +86,15 @@ The system utilizes resource tags in the CDK stack to establish the required tra
 # 1. Navigate to the Target API Directory
 cd poc-validator-user-api
 
-# 2. Execute Unit Tests
-npm run test:unit
-
-# 3. Deploy the Target API
-./deploy.sh
-
-# 4. Execute End-to-End Tests
-npm run test:e2e
+# 2. Execute CI/CD Pipeline (includes tests and deployment)
+./CICD.sh
 ```
 
 ---
 
 ## Integrated Operational Workflow
 
-1.  **Deployment:** The Validator API is provisioned with unique `HashCommit` metadata.
-2.  **Trigger:** A threshold breach (e.g., 5xx error rate) generates an SNS notification.
-3.  **Investigation:** The Sentry Agent identifies the specific code version, initializes the local workspace, and diagnoses the root cause.
+1.  **Deployment:** The Validator API is provisioned with unique `GitCommit` metadata and structured logs enabled.
+2.  **Trigger:** A threshold breach or SLO violation (detected via Application Signals) generates an SNS notification.
+3.  **Investigation:** The Sentry Agent identifies the specific code version via the `GitCommit` tag, initializes the local workspace, and diagnoses the root cause using structured logs.
 4.  **Resolution:** The Agent generates a Pull Request for review. Upon approval, the PagerDuty incident is resolved.

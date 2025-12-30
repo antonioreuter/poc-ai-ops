@@ -45,3 +45,11 @@ If you need to change the API key or URL, modify the `http-client.env.json` file
   }
 }
 ```
+
+## Debugging and Monitoring
+
+If you encounter issues while running these requests:
+
+1. **Structured Logs**: Check CloudWatch Logs for the relevant Lambda function. Logs are provided in JSON format via Pino, making it easy to filter for errors or specific Request IDs.
+2. **CloudWatch Alarms**: If the API starts failing, check for active alarms in the CloudWatch console. There are pre-configured alarms for 5XX errors and throttling.
+3. **Application Signals**: Use the Application Signals dashboard in the AWS Console to check the **Availability** and **Latency** SLOs for the `UserManagementAPI` service.
