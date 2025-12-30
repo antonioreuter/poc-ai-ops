@@ -1,14 +1,18 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, TABLE_NAME } from "../utils/dynamodb";
+import logger from "../utils/logger";
 
-export const handler: APIGatewayProxyHandler = async () => {
+const handler: APIGatewayProxyHandler = async (event) => {
+  logger.info("Incoming request to list users");
   try {
     const result = await docClient.send(
       new ScanCommand({
         TableName: TABLE_NAME,
       })
     );
+
+    logger.info({ count: result.Items?.length }, "Users retrieved successfully");
 
     return {
       statusCode: 200,
@@ -18,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async () => {
       body: JSON.stringify(result.Items || []),
     };
   } catch (error) {
-    console.error("Error listing users:", error);
+    logger.error({ error }, "Error listing users");
     return {
       statusCode: 500,
       headers: {
@@ -28,3 +32,5 @@ export const handler: APIGatewayProxyHandler = async () => {
     };
   }
 };
+
+module.exports = { handler };

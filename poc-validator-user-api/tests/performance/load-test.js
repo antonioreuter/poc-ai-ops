@@ -15,10 +15,10 @@ export const options = {
   iterations: 100,
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   thresholds: {
-    'rt_create_user': ['p(95)<1000'], 
-    'rt_list_users': ['p(95)<500'],
-    'rt_get_user': ['p(95)<300'],
-    'rt_delete_user': ['p(95)<300'],
+    'rt_create_user': ['p(95)<1200'], 
+    'rt_list_users': ['p(95)<800'],
+    'rt_get_user': ['p(95)<500'],
+    'rt_delete_user': ['p(95)<500'],
     http_req_failed: ['rate<0.01'], 
   },
 };

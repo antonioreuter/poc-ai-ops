@@ -8,11 +8,12 @@
     "test:unit": "vitest run tests/unit",
     "test:e2e": "dotenv -e .env -- vitest run tests/e2e",
     "test:perf": "dotenv -e .env -- k6 run tests/performance/load-test.js",
-    "build": "esbuild src/**/*.ts --bundle --platform=node --target=node22 --outdir=dist"
+    "deploy": "cd infrastructure && npx cdk deploy"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.400.0",
     "@aws-sdk/lib-dynamodb": "^3.400.0",
+    "pino": "^10.1.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

@@ -2,13 +2,16 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 import { docClient, TABLE_NAME } from "../utils/dynamodb";
+import logger from "../utils/logger";
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+const handler: APIGatewayProxyHandler = async (event) => {
+  logger.info({ event }, "Incoming request to create user");
   try {
     if (!event.body) throw new Error("Missing body");
     const body = JSON.parse(event.body);
     
     if (!body.email) {
+      logger.warn("Request failed: Missing email");
       return {
         statusCode: 400,
         headers: { "Content-Type": "application/json" },
@@ -29,6 +32,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     );
 
     if (existingEmail.Items && existingEmail.Items.length > 0) {
+      logger.warn({ email: body.email }, "Conflict: Email already exists");
       return {
         statusCode: 409,
         headers: { "Content-Type": "application/json" },
@@ -51,6 +55,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       })
     );
 
+    logger.info({ userId }, "User created successfully");
+
     return {
       statusCode: 201,
       headers: {
@@ -59,7 +65,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify(newUser),
     };
   } catch (error) {
-    console.error("Error creating user:", error);
+    logger.error({ error }, "Error creating user");
     return {
       statusCode: 500,
       headers: {
@@ -69,3 +75,5 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 };
+
+module.exports = { handler };

@@ -12,7 +12,7 @@ The objective of this project is to automate the entire remediation lifecycle—
 
 ```mermaid
 sequenceDiagram
-    participant AWS as AWS (CloudWatch/SAM)
+    participant AWS as AWS (CloudWatch/CDK)
     participant PD as PagerDuty
     participant Agent as Sentry Agent (Strands SDK)
     participant AI as AI Models (Gemini/Claude)
@@ -54,13 +54,11 @@ sequenceDiagram
 
 **Purpose:** Target system for AI verification and validation testing.
 
-- **Technical Stack:** Node.js 22, TypeScript, AWS SAM, and Amazon DynamoDB.
+- **Technical Stack:** Node.js 22, TypeScript, AWS CDK, and Amazon DynamoDB.
 - **Agent-Ready Metadata:** Adheres to strict tagging standards required for automated traceability.
 - **Diagnostic Simulation:** Incorporates a Custom Lambda Authorizer to simulate authentication failures, facilitating diagnostic verification.
 
-### Agent-Ready Tagging Standards
-
-The system utilizes the following resource tags in `template.yaml` to establish the required traceability:
+The system utilizes resource tags in the CDK stack to establish the required traceability:
 
 | Tag              | Value                    | Purpose                                                                     |
 | :--------------- | :----------------------- | :-------------------------------------------------------------------------- |
@@ -75,7 +73,7 @@ The system utilizes the following resource tags in `template.yaml` to establish 
 ### Prerequisites
 
 - **Node.js**: Version 22.x or higher
-- **AWS SAM CLI**: Installed and configured with appropriate credentials
+- **AWS CDK CLI**: Installed and configured with appropriate credentials
 - **Ollama**: Local instance running for data processing
 - **Environment Configuration**: Gemini and AWS Bedrock API keys configured within the agent environment
 

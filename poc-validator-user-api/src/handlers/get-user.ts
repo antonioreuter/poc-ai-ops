@@ -1,12 +1,14 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, TABLE_NAME } from "../utils/dynamodb";
+import logger from "../utils/logger";
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+const handler: APIGatewayProxyHandler = async (event) => {
+  const id = event.pathParameters?.id;
+  logger.info({ userId: id }, "Incoming request to get user");
   try {
-    const id = event.pathParameters?.id;
-
     if (!id) {
+      logger.warn("Request failed: Missing user ID");
       return {
         statusCode: 400,
         headers: {
@@ -24,6 +26,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     );
 
     if (!result.Item) {
+      logger.warn({ userId: id }, "User not found");
       return {
         statusCode: 404,
         headers: {
@@ -41,7 +44,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify(result.Item),
     };
   } catch (error) {
-    console.error("Error fetching user:", error);
+    logger.error({ error, userId: id }, "Error fetching user");
     return {
       statusCode: 500,
       headers: {
@@ -51,3 +54,5 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 };
+
+module.exports = { handler };

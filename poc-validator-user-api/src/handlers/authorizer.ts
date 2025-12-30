@@ -2,8 +2,9 @@ import {
   APIGatewayRequestAuthorizerEvent,
   APIGatewayAuthorizerResult,
 } from "aws-lambda";
+import logger from "../utils/logger";
 
-export const handler = async (
+const handler = async (
   event: APIGatewayRequestAuthorizerEvent
 ): Promise<APIGatewayAuthorizerResult> => {
   // In a real scenario, fetch this from Secrets Manager
@@ -11,7 +12,10 @@ export const handler = async (
   const requestKey =
     event.headers?.["x-api-key"] || event.headers?.["X-Api-Key"];
 
-  const effect = requestKey === VALID_API_KEY ? "Allow" : "Deny";
+  const isAuthorized = requestKey === VALID_API_KEY;
+  const effect = isAuthorized ? "Allow" : "Deny";
+
+  logger.info({ isAuthorized, resource: event.methodArn }, "Authorization check");
 
   // Use wildcard for Resource to allow caching to work across different paths/methods
   // Modified to force redeploy with TTL 0
@@ -31,3 +35,5 @@ export const handler = async (
     },
   };
 };
+
+module.exports = { handler };
