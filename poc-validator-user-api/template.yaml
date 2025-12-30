@@ -16,9 +16,19 @@ Globals:
     Timeout: 10
     Architectures:
       - x86_64
+    Tracing: Active
     Environment:
       Variables:
         TABLE_NAME: !Ref UsersTable
+        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+        OTEL_SERVICE_NAME: UserManagementAPI
+        OTEL_PROPAGATORS: tracecontext,baggage,b3,xray
+        OTEL_RESOURCE_ATTRIBUTES: !Sub "service.name=UserManagementAPI,deployment.environment=Prod,repository.name=${RepositoryName},commit.hash=${CommitHash}"
+    Layers:
+      - !Sub arn:aws:lambda:${AWS::Region}:184504079847:layer:aws-otel-nodejs-amd64-ver-1-30-0:1
+    Policies:
+      - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+      - arn:aws:iam::aws:policy/CloudWatchApplicationSignalsExecutionRolePolicy
     Tags:
       Service: UserManagementAPI
       RepositoryName: !Ref RepositoryName
@@ -59,6 +69,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
+      TracingEnabled: true
       Auth:
         DefaultAuthorizer: ApiKeyAuthorizer
         Authorizers:
@@ -182,6 +193,7 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:GetItem
+                - dynamodb:DeleteItem
               Resource: !GetAtt UsersTable.Arn
       Events:
         DeleteUser:
