@@ -104,43 +104,70 @@ export class MonitoringConstruct extends Construct {
 
     // 3. CloudWatch Alarms
     
-    // API Gateway 5XX Errors
+    // API Gateway 5XX Errors - Alert on burst of errors
     const api5xxAlarm = new cloudwatch.Alarm(this, 'Api5xxAlarm', {
       metric: props.api.metricServerError({
         period: cdk.Duration.minutes(1),
         statistic: 'Sum',
       }),
-      threshold: 1,
+      threshold: 5,
       evaluationPeriods: 1,
-      alarmDescription: 'API Gateway returned 5XX errors',
+      alarmDescription: 'API Gateway returned multiple 5XX errors within 1 minute',
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
     });
     api5xxAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
 
-    // Lambda Throttles (aggregated across all functions)
+    // API Gateway Latency - Alert if average latency > 1s for 5 consecutive minutes
+    const apiLatencyAlarm = new cloudwatch.Alarm(this, 'ApiLatencyAlarm', {
+      metric: props.api.metricLatency({
+        period: cdk.Duration.minutes(1),
+        statistic: 'Average',
+      }),
+      threshold: 1000,
+      evaluationPeriods: 5,
+      alarmDescription: 'API Gateway average latency is above 1s for 5 minutes',
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    apiLatencyAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
+
+    // Lambda Monitoring (Errors and Throttles)
     props.functions.forEach(fn => {
+      // Lambda Errors - Alert on burst of errors
+      const errorAlarm = new cloudwatch.Alarm(this, `${fn.node.id}ErrorAlarm`, {
+        metric: fn.metricErrors({
+          period: cdk.Duration.minutes(1),
+          statistic: 'Sum',
+        }),
+        threshold: 5,
+        evaluationPeriods: 1,
+        alarmDescription: `Lambda function ${fn.node.id} has multiple errors within 1 minute`,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      });
+      errorAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
+
+      // Lambda Throttles - Alert if sustained throttling
       const throttleAlarm = new cloudwatch.Alarm(this, `${fn.node.id}ThrottleAlarm`, {
         metric: fn.metricThrottles({
           period: cdk.Duration.minutes(1),
           statistic: 'Sum',
         }),
-        threshold: 1,
-        evaluationPeriods: 1,
-        alarmDescription: `Lambda function ${fn.node.id} is being throttled`,
+        threshold: 5,
+        evaluationPeriods: 3,
+        alarmDescription: `Lambda function ${fn.node.id} is being throttled for 3 consecutive minutes`,
         treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
       });
       throttleAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
     });
 
-    // DynamoDB Throttles
+    // DynamoDB Throttles - Alert if sustained throttling
     const tableReadThrottleAlarm = new cloudwatch.Alarm(this, 'TableReadThrottleAlarm', {
       metric: props.table.metric('ReadThrottleEvents', {
         period: cdk.Duration.minutes(1),
         statistic: 'Sum',
       }),
-      threshold: 1,
-      evaluationPeriods: 1,
-      alarmDescription: 'DynamoDB table read operations are being throttled',
+      threshold: 5,
+      evaluationPeriods: 3,
+      alarmDescription: 'DynamoDB table read operations are being throttled for 3 consecutive minutes',
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
     });
     tableReadThrottleAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
@@ -150,9 +177,9 @@ export class MonitoringConstruct extends Construct {
         period: cdk.Duration.minutes(1),
         statistic: 'Sum',
       }),
-      threshold: 1,
-      evaluationPeriods: 1,
-      alarmDescription: 'DynamoDB table write operations are being throttled',
+      threshold: 5,
+      evaluationPeriods: 3,
+      alarmDescription: 'DynamoDB table write operations are being throttled for 3 consecutive minutes',
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
     });
     tableWriteThrottleAlarm.addAlarmAction(new cw_actions.SnsAction(this.alarmTopic));
